@@ -1,0 +1,6 @@
+hypothesis	label
+H2	(B6_T2_fed-B6_T1_fed) - (S9_T2_fed-S9_T1_fed)
+H2	(B6_T2_fed-B6_T0_fed ) - (S9_T2_fed-S9_T0_fed)
+H2	(B6_T1_fed-B6_T0_fed) - (S9_T1_fed-S9_T0_fed)
+H4	(B6_T1_FED-FASTED - B6_T0_FED-FASTED )- (S9_T1_FED-FASTED - S9_T0_FED-FASTED)
+H4	(B6_T2_FED-FASTED - B6_T0_FED-FASTED) - (S9_T2_FED-FASTED - S9_T0_FED-FASTED)

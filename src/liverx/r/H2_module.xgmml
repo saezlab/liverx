@@ -1,0 +1,163 @@
+<?xml version="1.0"?>
+<graph label="network" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:cy="http://www.cytoscape.org" xmlns="http://www.cs.rpi.edu/XGMML">
+ <att name="documentVersion" value="1.1"/>
+ <att name="networkMetadata">
+  <rdf:RDF>
+   <rdf:Description rdf:about="http://www.cytoscape.org/">
+    <dc:type>Protein-Protein Interaction</dc:type>
+    <dc:description>N/A</dc:description>
+    <dc:identifier>N/A</dc:identifier>
+    <dc:date>2015-06-08 10:38:22</dc:date>
+    <dc:title>network</dc:title>
+    <dc:format>BioNet-Cytoscape-XGMML</dc:format>
+   </rdf:Description>
+  </rdf:RDF>
+ </att>
+ <node label="VA0D1_MOUSE" id="1">
+  <att type="string" name="name" value="VA0D1_MOUSE"/>
+  <att type="real" name="score" value="-15.2996875795885"/>
+ </node>
+ <node label="VATE1_MOUSE" id="2">
+  <att type="string" name="name" value="VATE1_MOUSE"/>
+  <att type="real" name="score" value="1.9467986738726"/>
+ </node>
+ <node label="MDHC_MOUSE" id="3">
+  <att type="string" name="name" value="MDHC_MOUSE"/>
+  <att type="real" name="score" value="-15.8658177356806"/>
+ </node>
+ <node label="GPDA_MOUSE" id="4">
+  <att type="string" name="name" value="GPDA_MOUSE"/>
+  <att type="real" name="score" value="30.0156157326033"/>
+ </node>
+ <node label="CASP7_MOUSE" id="5">
+  <att type="string" name="name" value="CASP7_MOUSE"/>
+  <att type="real" name="score" value="-17.1402529159272"/>
+ </node>
+ <node label="FAS_MOUSE" id="6">
+  <att type="string" name="name" value="FAS_MOUSE"/>
+  <att type="real" name="score" value="30.6962244952436"/>
+ </node>
+ <node label="THRB_MOUSE" id="7">
+  <att type="string" name="name" value="THRB_MOUSE"/>
+  <att type="real" name="score" value="-5.89813752960005"/>
+ </node>
+ <node label="ALDOB_MOUSE" id="8">
+  <att type="string" name="name" value="ALDOB_MOUSE"/>
+  <att type="real" name="score" value="57.2032419230351"/>
+ </node>
+ <node label="ALBU_MOUSE" id="9">
+  <att type="string" name="name" value="ALBU_MOUSE"/>
+  <att type="real" name="score" value="-9.13675549141497"/>
+ </node>
+ <node label="HEMO_MOUSE" id="10">
+  <att type="string" name="name" value="HEMO_MOUSE"/>
+  <att type="real" name="score" value="10.7662961059688"/>
+ </node>
+ <node label="MT2_MOUSE" id="11">
+  <att type="string" name="name" value="MT2_MOUSE"/>
+  <att type="real" name="score" value="-8.75870134663688"/>
+ </node>
+ <node label="CASP3_MOUSE" id="12">
+  <att type="string" name="name" value="CASP3_MOUSE"/>
+  <att type="real" name="score" value="10.5505760450931"/>
+ </node>
+ <node label="METK1_MOUSE" id="13">
+  <att type="string" name="name" value="METK1_MOUSE"/>
+  <att type="real" name="score" value="10.0343309881025"/>
+ </node>
+ <node label="HYEP_MOUSE" id="14">
+  <att type="string" name="name" value="HYEP_MOUSE"/>
+  <att type="real" name="score" value="-15.9446165670312"/>
+ </node>
+ <node label="RHOB_MOUSE" id="15">
+  <att type="string" name="name" value="RHOB_MOUSE"/>
+  <att type="real" name="score" value="20.5668317419778"/>
+ </node>
+ <node label="FETA_MOUSE" id="16">
+  <att type="string" name="name" value="FETA_MOUSE"/>
+  <att type="real" name="score" value="-10.8381655058265"/>
+ </node>
+ <node label="GSTM1_MOUSE" id="17">
+  <att type="string" name="name" value="GSTM1_MOUSE"/>
+  <att type="real" name="score" value="14.4510186281571"/>
+ </node>
+ <node label="GSTP1_MOUSE" id="18">
+  <att type="string" name="name" value="GSTP1_MOUSE"/>
+  <att type="real" name="score" value="57.2032419230351"/>
+ </node>
+ <node label="LDHA_MOUSE" id="19">
+  <att type="string" name="name" value="LDHA_MOUSE"/>
+  <att type="real" name="score" value="28.0662555278668"/>
+ </node>
+ <node label="ADH1_MOUSE" id="20">
+  <att type="string" name="name" value="ADH1_MOUSE"/>
+  <att type="real" name="score" value="3.43579170451456"/>
+ </node>
+ <node label="CEAM1_MOUSE" id="21">
+  <att type="string" name="name" value="CEAM1_MOUSE"/>
+  <att type="real" name="score" value="14.5108434327449"/>
+ </node>
+ <edge label="VA0D1_MOUSE (pp) VATE1_MOUSE" source="1" target="2">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="VA0D1_MOUSE (pp) CASP7_MOUSE" source="1" target="5">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="VA0D1_MOUSE (pp) FAS_MOUSE" source="1" target="6">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="VATE1_MOUSE (pp) ALDOB_MOUSE" source="2" target="8">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="MDHC_MOUSE (pp) GPDA_MOUSE" source="3" target="4">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="MDHC_MOUSE (pp) THRB_MOUSE" source="3" target="7">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="MDHC_MOUSE (pp) LDHA_MOUSE" source="3" target="19">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="CASP7_MOUSE (pp) FAS_MOUSE" source="5" target="6">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="CASP7_MOUSE (pp) CASP3_MOUSE" source="5" target="12">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="FAS_MOUSE (pp) CEAM1_MOUSE" source="6" target="21">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="THRB_MOUSE (pp) ALBU_MOUSE" source="7" target="9">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="ALBU_MOUSE (pp) HEMO_MOUSE" source="9" target="10">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="ALBU_MOUSE (pp) FETA_MOUSE" source="9" target="16">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="HEMO_MOUSE (pp) METK1_MOUSE" source="10" target="13">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="MT2_MOUSE (pp) HYEP_MOUSE" source="11" target="14">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="MT2_MOUSE (pp) FETA_MOUSE" source="11" target="16">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="MT2_MOUSE (pp) ADH1_MOUSE" source="11" target="20">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="CASP3_MOUSE (pp) FETA_MOUSE" source="12" target="16">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="HYEP_MOUSE (pp) RHOB_MOUSE" source="14" target="15">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="HYEP_MOUSE (pp) GSTM1_MOUSE" source="14" target="17">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+ <edge label="HYEP_MOUSE (pp) GSTP1_MOUSE" source="14" target="18">
+  <att type="real" name="weight" value="1"/>
+ </edge>
+</graph>
