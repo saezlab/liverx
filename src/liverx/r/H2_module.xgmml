@@ -7,7 +7,7 @@
     <dc:type>Protein-Protein Interaction</dc:type>
     <dc:description>N/A</dc:description>
     <dc:identifier>N/A</dc:identifier>
-    <dc:date>2015-06-08 10:38:22</dc:date>
+    <dc:date>2015-06-08 11:45:29</dc:date>
     <dc:title>network</dc:title>
     <dc:format>BioNet-Cytoscape-XGMML</dc:format>
    </rdf:Description>
@@ -15,87 +15,87 @@
  </att>
  <node label="VA0D1_MOUSE" id="1">
   <att type="string" name="name" value="VA0D1_MOUSE"/>
-  <att type="real" name="score" value="-15.2996875795885"/>
+  <att type="real" name="score" value="-15.2996847997518"/>
  </node>
  <node label="VATE1_MOUSE" id="2">
   <att type="string" name="name" value="VATE1_MOUSE"/>
-  <att type="real" name="score" value="1.9467986738726"/>
+  <att type="real" name="score" value="1.94679882303479"/>
  </node>
  <node label="MDHC_MOUSE" id="3">
   <att type="string" name="name" value="MDHC_MOUSE"/>
-  <att type="real" name="score" value="-15.8658177356806"/>
+  <att type="real" name="score" value="-15.8658148694898"/>
  </node>
  <node label="GPDA_MOUSE" id="4">
   <att type="string" name="name" value="GPDA_MOUSE"/>
-  <att type="real" name="score" value="30.0156157326033"/>
+  <att type="real" name="score" value="30.0156116003181"/>
  </node>
  <node label="CASP7_MOUSE" id="5">
   <att type="string" name="name" value="CASP7_MOUSE"/>
-  <att type="real" name="score" value="-17.1402529159272"/>
+  <att type="real" name="score" value="-17.1402498553417"/>
  </node>
  <node label="FAS_MOUSE" id="6">
   <att type="string" name="name" value="FAS_MOUSE"/>
-  <att type="real" name="score" value="30.6962244952436"/>
+  <att type="real" name="score" value="30.6962202591424"/>
  </node>
  <node label="THRB_MOUSE" id="7">
   <att type="string" name="name" value="THRB_MOUSE"/>
-  <att type="real" name="score" value="-5.89813752960005"/>
+  <att type="real" name="score" value="-5.8981361838188"/>
  </node>
  <node label="ALDOB_MOUSE" id="8">
   <att type="string" name="name" value="ALDOB_MOUSE"/>
-  <att type="real" name="score" value="57.2032419230351"/>
+  <att type="real" name="score" value="57.203233643714"/>
  </node>
  <node label="ALBU_MOUSE" id="9">
   <att type="string" name="name" value="ALBU_MOUSE"/>
-  <att type="real" name="score" value="-9.13675549141497"/>
+  <att type="real" name="score" value="-9.13675365163454"/>
  </node>
  <node label="HEMO_MOUSE" id="10">
   <att type="string" name="name" value="HEMO_MOUSE"/>
-  <att type="real" name="score" value="10.7662961059688"/>
+  <att type="real" name="score" value="10.7662949098582"/>
  </node>
  <node label="MT2_MOUSE" id="11">
   <att type="string" name="name" value="MT2_MOUSE"/>
-  <att type="real" name="score" value="-8.75870134663688"/>
+  <att type="real" name="score" value="-8.75869956452254"/>
  </node>
  <node label="CASP3_MOUSE" id="12">
   <att type="string" name="name" value="CASP3_MOUSE"/>
-  <att type="real" name="score" value="10.5505760450931"/>
+  <att type="real" name="score" value="10.5505748818872"/>
  </node>
  <node label="METK1_MOUSE" id="13">
   <att type="string" name="name" value="METK1_MOUSE"/>
-  <att type="real" name="score" value="10.0343309881025"/>
+  <att type="real" name="score" value="10.0343299036415"/>
  </node>
  <node label="HYEP_MOUSE" id="14">
   <att type="string" name="name" value="HYEP_MOUSE"/>
-  <att type="real" name="score" value="-15.9446165670312"/>
+  <att type="real" name="score" value="-15.9446136888209"/>
  </node>
  <node label="RHOB_MOUSE" id="15">
   <att type="string" name="name" value="RHOB_MOUSE"/>
-  <att type="real" name="score" value="20.5668317419778"/>
+  <att type="real" name="score" value="20.5668290509529"/>
  </node>
  <node label="FETA_MOUSE" id="16">
   <att type="string" name="name" value="FETA_MOUSE"/>
-  <att type="real" name="score" value="-10.8381655058265"/>
+  <att type="real" name="score" value="-10.8381634065233"/>
  </node>
  <node label="GSTM1_MOUSE" id="17">
   <att type="string" name="name" value="GSTM1_MOUSE"/>
-  <att type="real" name="score" value="14.4510186281571"/>
+  <att type="real" name="score" value="14.4510168700013"/>
  </node>
  <node label="GSTP1_MOUSE" id="18">
   <att type="string" name="name" value="GSTP1_MOUSE"/>
-  <att type="real" name="score" value="57.2032419230351"/>
+  <att type="real" name="score" value="57.203233643714"/>
  </node>
  <node label="LDHA_MOUSE" id="19">
   <att type="string" name="name" value="LDHA_MOUSE"/>
-  <att type="real" name="score" value="28.0662555278668"/>
+  <att type="real" name="score" value="28.0662516929252"/>
  </node>
  <node label="ADH1_MOUSE" id="20">
   <att type="string" name="name" value="ADH1_MOUSE"/>
-  <att type="real" name="score" value="3.43579170451456"/>
+  <att type="real" name="score" value="3.43579162655478"/>
  </node>
  <node label="CEAM1_MOUSE" id="21">
   <att type="string" name="name" value="CEAM1_MOUSE"/>
-  <att type="real" name="score" value="14.5108434327449"/>
+  <att type="real" name="score" value="14.5108416654638"/>
  </node>
  <edge label="VA0D1_MOUSE (pp) VATE1_MOUSE" source="1" target="2">
   <att type="real" name="weight" value="1"/>

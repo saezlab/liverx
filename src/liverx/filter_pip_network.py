@@ -11,7 +11,7 @@ id_map = id_map.set_index('Preferred_Name')['Name'].to_dict()
 print '[INFO] ENS to Uniprot map: ', len(id_map)
 
 # Import network
-network = read_csv(wd + '/files/genemania_mouse_network.txt', sep='\t')
+network = read_csv(wd + '/files/COMBINED.DEFAULT_NETWORKS.BP_COMBINING.txt', sep='\t')
 print '[INFO] GeneMania mouse PIP network', network.shape
 
 # Remove interactions with weight lower than X threshold

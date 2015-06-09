@@ -2,4 +2,5 @@
 .idea
 *.pyc
 gurobi.log
-genemania_mouse_network.txt
+COMBINED.DEFAULT_NETWORKS.BP_COMBINING.txt
+.Rhistory

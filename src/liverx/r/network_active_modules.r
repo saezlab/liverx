@@ -20,14 +20,14 @@ lapply(c('H2', 'H4'), function (condition) {
   conditions <- comparisons[which(comparisons['hypothesis'] == condition), 'label']
   
   # Sub-set data-set comparisons to hypothesis
-  sub_dataset <- na.omit(dataset[which(dataset[,'Label'] %in% conditions),])
-  sub_dataset <- sub_dataset[, c('Protein', 'Label', 'adj.pvalue')]
-  sub_dataset <- na.omit(cast(sub_dataset, Protein ~ Label))
-  rownames(sub_dataset) <- sub_dataset[,'Protein']
-  sub_dataset <- sub_dataset[, -1]
+  sub_dataset <- dataset[which(dataset[,'Label'] %in% conditions),]
+  sub_dataset <- na.omit(cast(sub_dataset[, c('Protein', 'Label', 'adj.pvalue')], Protein ~ Label))
   
-  pvals <- aggrPvals(as.matrix(sub_dataset), order=length(sub_dataset), plot=F)
-  names(pvals) <- rownames(sub_dataset)
+  proteins <- sub_dataset[,'Protein']
+  sub_dataset <-  as.matrix(sub_dataset[, -1])
+  rownames(sub_dataset) <- proteins
+  
+  pvals <- aggrPvals(sub_dataset, order=dim(sub_dataset)[2], plot=F)
   pvals[pvals == 0] <- min(pvals[pvals != 0])
   
   # Reduce PPI network size
