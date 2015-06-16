@@ -2,6 +2,7 @@ import itertools as it
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
+from liverx import wd
 from scipy.cluster.hierarchy import dendrogram, linkage
 from scipy.stats.stats import pearsonr, spearmanr
 from pandas import DataFrame, Series, read_csv, pivot_table, melt
@@ -12,8 +13,6 @@ def pearson(x, y):
     mask = np.bitwise_and(np.isfinite(x), np.isfinite(y))
     cor, pvalue = pearsonr(x[mask], y[mask]) if np.sum(mask) > 1 else (np.NaN, np.NaN)
     return cor, pvalue
-
-wd = '/Users/emanuel/Projects/projects/liverx'
 
 sns.set_style('white')
 

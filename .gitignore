@@ -3,4 +3,7 @@
 *.pyc
 gurobi.log
 COMBINED.DEFAULT_NETWORKS.BP_COMBINING.txt
-.Rhistory
+*.Rhistory
+*.sqlite
+*.RData
+heinz
