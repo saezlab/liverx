@@ -45,6 +45,7 @@ lapply(c('H2', 'H4'), function (condition) {
   # Fit Beta-uniform mixture model
   fb <- fitBumModel(pvals, plot=F)
   scores <- scoreNodes(network=sub_network, fb=fb, fdr=fdr_thres)
+  scores <- round(scores, 4)
   
   # Write files to run Heinz
   edges_file <- paste(results_folder, condition, '_', fdr_thres, '_edges.txt', sep='')
@@ -56,7 +57,7 @@ lapply(c('H2', 'H4'), function (condition) {
   writeHeinzNodes(network=sub_network, file=nodes_file, node.scores=scores)
   
   # Execute Heinz
-  run_heinz_cmd <- paste('heinz -e ', edges_file, ' -n ', nodes_file, ' -o ', result_file, sep='')
+  run_heinz_cmd <- paste('heinz -e ', edges_file, ' -n ', nodes_file, ' -o ', result_file, ' -t 2500',sep='')
   system(run_heinz_cmd)
   
   # Importing the solution of a maxinum-scoring subnetwork
