@@ -34,21 +34,23 @@ network = read_csv(wd + '/files/COMBINED.DEFAULT_NETWORKS.BP_COMBINING.txt', sep
 print '[INFO] GeneMania mouse PIP network', network.shape
 
 # Remove interactions with weight lower than X threshold
-thres = 10e-4
-network = network[network['Weight'] > thres]
-print '[INFO] Remove interactions with weight below %f: ' % thres, network.shape
+for thres in [10**-4, 10**-3]:
+    print '[INFO] Weight threshold: %.1e' % thres
 
-# Remove self interactions
-network = network[[a != b for a, b in zip(*(network['Gene_A'], network['Gene_B']))]]
-print '[INFO] Remove self interactions: ', network.shape
+    subnetwork = network[network['Weight'] >= thres]
+    print '[INFO] Remove interactions with weight below %f: ' % thres, subnetwork.shape
 
-# Remove interactions without any measured node
-network = network[[a in id_map and b in id_map for a, b in zip(*(network['Gene_A'], network['Gene_B']))]]
-print '[INFO] Remove interactions without any measured node: ', network.shape
+    # Remove self interactions
+    subnetwork = subnetwork[[a != b for a, b in zip(*(subnetwork['Gene_A'], subnetwork['Gene_B']))]]
+    print '[INFO] Remove self interactions: ', subnetwork.shape
 
-# Convert ENS to Uniprot
-network['Gene_A'] = [id_map[i] for i in network['Gene_A']]
-network['Gene_B'] = [id_map[i] for i in network['Gene_B']]
+    # Remove interactions without mapping ID
+    subnetwork = subnetwork[[a in id_map and b in id_map for a, b in zip(*(subnetwork['Gene_A'], subnetwork['Gene_B']))]]
+    print '[INFO] Remove interactions without any measured node: ', subnetwork.shape
 
-# Export to file
-network[['Gene_A', 'Gene_B']].to_csv(wd + '/files/genemania_mouse_network_filtered.txt', sep='\t', index=False)
+    # Convert ENS to Uniprot
+    subnetwork['Gene_A'] = [id_map[i] for i in subnetwork['Gene_A']]
+    subnetwork['Gene_B'] = [id_map[i] for i in subnetwork['Gene_B']]
+
+    # Export to file
+    subnetwork[['Gene_A', 'Gene_B']].to_csv('%s/files/genemania_mouse_network_filtered_%.0e.txt' % (wd, thres), sep='\t', index=False)

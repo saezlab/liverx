@@ -7,3 +7,5 @@ COMBINED.DEFAULT_NETWORKS.BP_COMBINING.txt
 *.sqlite
 *.RData
 heinz
+*genemania_mouse_network_filtered_*.txt
+10090.protein.links.v10.txt
