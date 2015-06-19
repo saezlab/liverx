@@ -9,3 +9,6 @@ COMBINED.DEFAULT_NETWORKS.BP_COMBINING.txt
 heinz
 *genemania_mouse_network_filtered_*.txt
 10090.protein.links.v10.txt
+10090_reviewed_uniprot_2_string.04_2015.tsv
+string_mouse_network_filtered_800.txt
+String_to_UniProt.tab

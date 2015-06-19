@@ -4,14 +4,14 @@ library(reshape)
 # Configure workplace
 setwd('~/Projects/projects/liverx/')
 
-results_folder <- 'files/network_enrichment'
+results_folder <- 'files/network_enrichment/'
 message(paste('Results folder set to:', results_folder))
 
 # Import data-set
 dataset <- read.csv('data/result_swath_v2.3.7_fRfS.csv')
 
 # Import network
-network <- loadNetwork.tab('files/genemania_mouse_network_filtered_1e-04.txt', header=T, directed=F, format='graphNEL')
+network <- loadNetwork.tab('files/string_mouse_network_filtered_800.txt', header=T, directed=F, format='graphNEL')
 
 # Import hypothesis conditions
 comparisons <- read.table('files/hypothesis_conditions.txt', sep='\t', header=T)
@@ -53,7 +53,7 @@ lapply(c(1e-2, 1e-3, 1e-4), function (fdr_thres) {
     writeHeinzNodes(network=sub_network, file=nodes_file, node.scores=scores)
     
     # Execute Heinz
-    run_heinz_cmd <- paste('heinz -e ', edges_file, ' -n ', nodes_file, ' -o ', result_file, ' -t 3600',sep='')
+    run_heinz_cmd <- paste('heinz -e ', edges_file, ' -n ', nodes_file, ' -o ', result_file, ' -t 1500',sep='')
     system(run_heinz_cmd)
     
     # Importing the solution of a maxinum-scoring subnetwork
