@@ -17,7 +17,7 @@ network <- loadNetwork.tab('files/string_mouse_network_filtered_800.txt', header
 comparisons <- read.table('files/hypothesis_conditions.txt', sep='\t', header=T)
 
 # Sub-network for condition
-lapply(c(1e-2, 1e-3, 1e-4), function (fdr_thres) {
+lapply(c(5e-2, 1e-2, 1e-3, 1e-4), function (fdr_thres) {
   lapply(c('H2', 'H4'), function (condition) {
     # Get condition comparisons
     conditions <- comparisons[which(comparisons['hypothesis'] == condition), 'label']

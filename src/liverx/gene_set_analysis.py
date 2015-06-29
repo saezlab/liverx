@@ -68,7 +68,7 @@ print '[INFO] Consider only biological process GO Terms: ', len(go_terms)
 # ---- Run Hypergeometric test
 for hypothesis in ['H2', 'H4']:
 
-    for fdr_thres in ['0.01', '0.001', '1e-04']:
+    for fdr_thres in ['0.05', '0.01', '0.001', '1e-04']:
 
         # ---- Import sub-network
         subnetwork = read_csv('%s/files/network_enrichment/%s_%s_network.sif' % (wd, hypothesis, fdr_thres), header=None, sep='\t')
@@ -94,13 +94,23 @@ for hypothesis in ['H2', 'H4']:
         kegg_pathways_hyper['name'] = [re.findall('NAME\s*(.*) - Mus musculus\n?', kegg.get(p))[0] for p in kegg_pathways_hyper.index]
         kegg_pathways_hyper = kegg_pathways_hyper[kegg_pathways_hyper['adj.pvalue'] != 0.0]
 
-        rcParams['figure.figsize'] = 5, 0.25 * len(kegg_pathways_hyper)
-        y_pos = np.arange(len(kegg_pathways_hyper))
-        plt.barh(y_pos, -np.log10(kegg_pathways_hyper['adj.pvalue']), lw=0, alpha=.8, align='center')
-        sns.despine()
+        rcParams['figure.figsize'] = 5, 0.3 * len(kegg_pathways_hyper)
+        colours, y_pos = sns.color_palette('Paired', 2), [x + 1.5 for x in range(len(kegg_pathways_hyper))]
+
+        plt.barh(y_pos, -np.log10(kegg_pathways_hyper['pvalue']), lw=0, align='center', height=.5, color=colours[0], label='p-value')
+        plt.barh(y_pos, -np.log10(kegg_pathways_hyper['adj.pvalue']), lw=0, align='center', height=.5, color=colours[1], label='FDR')
         plt.yticks(y_pos, kegg_pathways_hyper['name'])
-        plt.xlabel('p-value (FDR -log10)')
-        plt.title('KEGG mouse pathways (hyper-geometric test)')
+
+        plt.axvline(-np.log10(0.05), ls='--', lw=0.4, c='gray')
+        plt.axvline(-np.log10(0.01), ls='--', lw=0.4, c='gray')
+
+        plt.text(-np.log10(0.05) * 1.01, .5, '5%', ha='left', color='gray', fontsize=9)
+        plt.text(-np.log10(0.01) * 1.01, .5, '1%', ha='left', color='gray', fontsize=9)
+
+        sns.despine()
+        plt.xlabel('-log10')
+        plt.title('KEGG pathways enrichment')
+        plt.legend(loc=4)
         plt.savefig('%s/reports/Figure7_%s_%s_kegg_enrichment.pdf' % (wd, hypothesis, fdr_thres), bbox_inches='tight')
         plt.close('all')
         print '[INFO] KEGG pathways enrichment plotted'
@@ -126,13 +136,23 @@ for hypothesis in ['H2', 'H4']:
         go_terms_hyper = go_terms_hyper[go_terms_hyper['intersection'] > 2]
         go_terms_hyper = go_terms_hyper[go_terms_hyper['adj.pvalue'] != 0.0]
 
-        rcParams['figure.figsize'] = 5, 0.25 * len(go_terms_hyper)
-        y_pos = np.arange(len(go_terms_hyper))
-        plt.barh(y_pos, -np.log10(go_terms_hyper['adj.pvalue']), lw=0, alpha=.8, align='center')
-        sns.despine()
+        rcParams['figure.figsize'] = 5, 0.3 * len(go_terms_hyper)
+        colours, y_pos = sns.color_palette('Paired', 2), [x + 1.5 for x in range(len(go_terms_hyper))]
+
+        plt.barh(y_pos, -np.log10(go_terms_hyper['pvalue']), lw=0, align='center', height=.5, color=colours[0], label='p-value')
+        plt.barh(y_pos, -np.log10(go_terms_hyper['adj.pvalue']), lw=0, align='center', height=.5, color=colours[1], label='FDR')
         plt.yticks(y_pos, go_terms_hyper['name'])
-        plt.xlabel('p-value (FDR -log10)')
-        plt.title('GO Terms (hyper-geometric test)')
+
+        plt.axvline(-np.log10(0.05), ls='--', lw=0.4, c='gray')
+        plt.axvline(-np.log10(0.01), ls='--', lw=0.4, c='gray')
+
+        plt.text(-np.log10(0.05) * 1.01, .5, '5%', ha='left', color='gray', fontsize=9)
+        plt.text(-np.log10(0.01) * 1.01, .5, '1%', ha='left', color='gray', fontsize=9)
+
+        sns.despine()
+        plt.xlabel('-log10')
+        plt.title('KEGG pathways enrichment')
+        plt.legend(loc=4)
         plt.savefig('%s/reports/Figure7_%s_%s_goterms_enrichment.pdf' % (wd, hypothesis, fdr_thres), bbox_inches='tight')
         plt.close('all')
         print '[INFO] GO terms enrichment plotted'
