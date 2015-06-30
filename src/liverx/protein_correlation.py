@@ -44,7 +44,7 @@ def randomise_matrix(matrix):
     random_df.values[movers] = np.random.permutation(random_df.values[movers])
     return random_df
 
-n_permutations = 1000
+n_permutations = 10000
 swath_rand_b6 = [randomise_matrix(swath_quant[b6]) for i in xrange(n_permutations)]
 swath_rand_s9 = [randomise_matrix(swath_quant[s9]) for i in xrange(n_permutations)]
 print '[INFO] SWATH data-set randomisation done: ', len(swath_rand_s9)
@@ -94,9 +94,9 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
     print '[INFO] Correlation differences calculated: ', len(correlation_df)
 
     # ---- Plot pairs
-    dif_pairs = set(zip(*correlation_df[correlation_df['e_pvalue'] < 0.05][['p1', 'p2']].T.values))
+    dif_pairs = set(zip(*correlation_df[correlation_df['e_pvalue'] < 0.01][['p1', 'p2']].T.values))
 
-    (f, grid), r_pos = plt.subplots(len(dif_pairs), 2, figsize=(7, 4 * len(dif_pairs)), sharey=False, sharex=True), 0
+    (f, grid), r_pos = plt.subplots(len(dif_pairs), 2, figsize=(7, 4 * len(dif_pairs)), sharey='row', sharex='col'), 0
     for p1, p2 in dif_pairs:
 
         plot_df = swath_quant.ix[[p1, p2]]
