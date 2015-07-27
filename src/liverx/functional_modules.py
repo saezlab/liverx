@@ -5,11 +5,11 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
+from liverx import wd
 from sklearn.metrics.pairwise import pairwise_distances
 from statsmodels.stats.multitest import multipletests
 from pandas.stats.misc import zscore
 from sklearn.cluster import AgglomerativeClustering, AffinityPropagation
-from liverx import wd
 from scipy.stats.stats import pearsonr
 from pandas import DataFrame, read_csv, melt
 

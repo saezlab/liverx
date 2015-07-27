@@ -5,19 +5,14 @@ import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
-from statsmodels.stats.multitest import multipletests
-from liverx import wd
 from scipy.stats.stats import pearsonr
+from liverx import wd
+from liverx.utils import pearson
+from statsmodels.stats.multitest import multipletests
 from pandas import DataFrame, read_csv, melt
 
 
-def pearson(x, y):
-    mask = np.bitwise_and(np.isfinite(x), np.isfinite(y))
-    cor, pvalue = pearsonr(x[mask], y[mask])
-    return cor, pvalue, sum(mask)
-
-
-sns.set_style('white')
+sns.set_style('ticks')
 
 swath_quant = read_csv('%s/data/result_swath_v2.3.7_protein_quant.tab' % wd, sep='\t').replace(0.0, np.NaN)
 
@@ -54,19 +49,21 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
 
     # ---- Import subnetwork
     subnetwork = read_csv('%s/files/network_enrichment/%s_%s_network.sif' % (wd, hypothesis, fdr_thres), header=None, sep='\t', names=['p1', 'i', 'p2'])
-    subnetwork_i = network_i.subgraph(set(it.chain(*network_i.neighborhood(set(subnetwork['p1']).union(subnetwork['p2']), order=0))))
+    subnetwork_i = network_i.subgraph(set(it.chain(*network_i.neighborhood(set(subnetwork['p1']).union(subnetwork['p2']), order=0)))).simplify()
     print '[INFO] Swath measured simplified string subnetwork: ', subnetwork_i.summary()
 
-    subnetwork = set(tuple(subnetwork_i.vs[[e.source, e.target]]['name']) for e in subnetwork_i.es)
+    subnetwork = [tuple(subnetwork_i.vs[[e.source, e.target]]['name']) for e in subnetwork_i.es]
 
     def correlation(p1, p2):
+        print '[INFO] %s - %s' % (p1, p2)
+
         # Calculate protein 1 and protein 2 correlation in both strains
         cor_b6, pvalue_b5, meas_b6 = pearson(swath_quant.ix[p1, b6], swath_quant.ix[p2, b6])
         cor_s9, pvalue_s9, meas_s9 = pearson(swath_quant.ix[p1, s9], swath_quant.ix[p2, s9])
 
         n_meas = min(meas_b6, meas_s9)
 
-        if n_meas > 3:
+        if n_meas > 4:
             # Calculate correlation difference
             cor_diff = abs(cor_b6 - cor_s9)
 
@@ -77,12 +74,11 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
             count = sum([(r_cor >= cor_diff >= 0) or (r_cor <= cor_diff < 0) for r_cor in rand_cor_diff])
             e_pvalue = 1 / n_permutations if count == 0 else count / n_permutations
 
-            if e_pvalue < 0.05:
-                print '[INFO] ', p1, p2, cor_diff, e_pvalue, min(meas_b6, meas_s9)
-
+            print '\t', p1, p2, cor_diff, e_pvalue, n_meas
             return p1, p2, cor_diff, e_pvalue, n_meas
 
         else:
+            print '\t', p1, p2, 'NaN', 'NaN', n_meas
             return p1, p2, np.NaN, np.NaN, n_meas
 
     # ---- Compute correlations differences
@@ -93,41 +89,41 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
     correlation_df.to_csv('%s/files/protein_pairs_%s_%s.txt' % (wd, hypothesis, fdr_thres), index=False, sep='\t')
     print '[INFO] Correlation differences calculated: ', len(correlation_df)
 
-    # ---- Plot pairs
-    dif_pairs = set(zip(*correlation_df[correlation_df['e_pvalue'] < 0.01][['p1', 'p2']].T.values))
-
-    (f, grid), r_pos = plt.subplots(len(dif_pairs), 2, figsize=(7, 4 * len(dif_pairs)), sharey='row', sharex='col'), 0
-    for p1, p2 in dif_pairs:
-
-        plot_df = swath_quant.ix[[p1, p2]]
-        plot_df['protein'] = plot_df.index
-        plot_df = melt(plot_df, id_vars='protein')
-        plot_df['time'] = [int(i.split('_')[1][1]) for i in plot_df['variable']]
-        plot_df['strain'] = [i.split('_')[0] for i in plot_df['variable']]
-        plot_df['condition'] = [i.split('_')[2] for i in plot_df['variable']]
-
-        p1_color, p2_color = [colors.rgb2hex(c) for c in sns.color_palette('Paired')[:2]]
-
-        for c_pos, condition in [(0, 'FED'), (1, 'FASTED')]:
-            ax = grid[r_pos][c_pos]
-            ax.set_xticks(range(3))
-
-            for protein, protein_colour in [(p1, p1_color), (p2, p2_color)]:
-                x, y = plot_df[plot_df.apply(lambda df: df['protein'] == protein and df['strain'] == 'B6' and df['condition'] == condition, axis=1)][['time', 'value']].T.values
-                ax.plot(x, y, ls='-', c=protein_colour, label='B6')
-                ax.scatter(x, y, s=50, c=protein_colour, edgecolors='none')
-
-                x, y = plot_df[plot_df.apply(lambda df: df['protein'] == protein and df['strain'] == 'S9' and df['condition'] == condition, axis=1)][['time', 'value']].T.values
-                ax.plot(x, y, ls='--', c=protein_colour, label='S9')
-                ax.scatter(x, y, s=50, label=protein, c=protein_colour, edgecolors='none')
-
-                ax.set_title(condition.lower())
-
-        sns.despine()
-        ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-
-        r_pos += 1
-
-    plt.savefig('%s/reports/Figure8_%s_%s_pairs_correlation.pdf' % (wd, hypothesis, fdr_thres), bbox_inches='tight')
-    plt.close('all')
-    print '[INFO] Gain/loss of correlation plot generated!'
+    # # ---- Plot pairs
+    # dif_pairs = set(zip(*correlation_df[correlation_df['e_pvalue'] < 0.01][['p1', 'p2']].T.values))
+    #
+    # (f, grid), r_pos = plt.subplots(len(dif_pairs), 2, figsize=(7, 4 * len(dif_pairs)), sharey='row', sharex='col'), 0
+    # for p1, p2 in dif_pairs:
+    #
+    #     plot_df = swath_quant.ix[[p1, p2]]
+    #     plot_df['protein'] = plot_df.index
+    #     plot_df = melt(plot_df, id_vars='protein')
+    #     plot_df['time'] = [int(i.split('_')[1][1]) for i in plot_df['variable']]
+    #     plot_df['strain'] = [i.split('_')[0] for i in plot_df['variable']]
+    #     plot_df['condition'] = [i.split('_')[2] for i in plot_df['variable']]
+    #
+    #     p1_color, p2_color = [colors.rgb2hex(c) for c in sns.color_palette('Paired')[:2]]
+    #
+    #     for c_pos, condition in [(0, 'FED'), (1, 'FASTED')]:
+    #         ax = grid[r_pos][c_pos]
+    #         ax.set_xticks(range(3))
+    #
+    #         for protein, protein_colour in [(p1, p1_color), (p2, p2_color)]:
+    #             x, y = plot_df[plot_df.apply(lambda df: df['protein'] == protein and df['strain'] == 'B6' and df['condition'] == condition, axis=1)][['time', 'value']].T.values
+    #             ax.plot(x, y, ls='-', c=protein_colour, label='B6')
+    #             ax.scatter(x, y, s=50, c=protein_colour, edgecolors='none')
+    #
+    #             x, y = plot_df[plot_df.apply(lambda df: df['protein'] == protein and df['strain'] == 'S9' and df['condition'] == condition, axis=1)][['time', 'value']].T.values
+    #             ax.plot(x, y, ls='--', c=protein_colour, label='S9')
+    #             ax.scatter(x, y, s=50, label=protein, c=protein_colour, edgecolors='none')
+    #
+    #             ax.set_title(condition.lower())
+    #
+    #     sns.despine()
+    #     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+    #
+    #     r_pos += 1
+    #
+    # plt.savefig('%s/reports/Figure8_%s_%s_pairs_correlation.pdf' % (wd, hypothesis, fdr_thres), bbox_inches='tight')
+    # plt.close('all')
+    # print '[INFO] Gain/loss of correlation plot generated!'
