@@ -13,7 +13,7 @@ from scipy.stats.distributions import hypergeom
 from bioservices import KEGG, KEGGParser, QuickGO, UniProt
 from pandas import DataFrame, read_csv
 
-sns.set_style('white')
+sns.set(style='ticks', palette='pastel', color_codes=True)
 
 # ---- Import network
 network = read_csv('%s/files/string_mouse_network_filtered_800.txt' % wd, sep='\t')
@@ -103,6 +103,14 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
     kegg_pathways_hyper = kegg_pathways_hyper[kegg_pathways_hyper['adj.pvalue'] < 0.05]
     kegg_pathways_hyper['name'] = [re.findall('NAME\s*(.*) - Mus musculus\n?', kegg.get(p))[0] for p in kegg_pathways_hyper.index]
     kegg_pathways_hyper = kegg_pathways_hyper[kegg_pathways_hyper['adj.pvalue'] != 0.0]
+
+    node_color_dict = dict(zip(*(kegg_pathways_hyper.tail(7).index, sns.color_palette('Set1', 7))))
+    [p for k in node_color_dict for p in kegg_pathways_proteins[k] if p in subnetwork_proteins]
+
+    subnetwork_i.vs['label'] = ['' in subnetwork_i.vs['name']]
+    subnetwork_i.vs['shape'] = ['circle' for n in subnetwork_i.vs['name']]
+    subnetwork_i.vs['color'] = [palette[1] if n in kegg_pathways_proteins[set_id] else palette[0] for n in subnetwork_i.vs['name']]
+    subnetwork_i.vs['size'] = [17 if n in kegg_pathways_proteins[set_id] else 7 for n in subnetwork_i.vs['name']]
 
     # Plot PPI network of the Kegg pathways
     for set_id, set_name in kegg_pathways_hyper['name'].tail(10).to_dict().items():
