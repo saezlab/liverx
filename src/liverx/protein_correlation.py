@@ -39,7 +39,7 @@ def randomise_matrix(matrix):
     random_df.values[movers] = np.random.permutation(random_df.values[movers])
     return random_df
 
-n_permutations = 10000
+n_permutations = 1000
 swath_rand_b6 = [randomise_matrix(swath_quant[b6]) for i in xrange(n_permutations)]
 swath_rand_s9 = [randomise_matrix(swath_quant[s9]) for i in xrange(n_permutations)]
 print '[INFO] SWATH data-set randomisation done: ', len(swath_rand_s9)
@@ -88,42 +88,3 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
     correlation_df = correlation_df.sort('diff', ascending=False)
     correlation_df.to_csv('%s/files/protein_pairs_%s_%s.txt' % (wd, hypothesis, fdr_thres), index=False, sep='\t')
     print '[INFO] Correlation differences calculated: ', len(correlation_df)
-
-    # # ---- Plot pairs
-    # dif_pairs = set(zip(*correlation_df[correlation_df['e_pvalue'] < 0.01][['p1', 'p2']].T.values))
-    #
-    # (f, grid), r_pos = plt.subplots(len(dif_pairs), 2, figsize=(7, 4 * len(dif_pairs)), sharey='row', sharex='col'), 0
-    # for p1, p2 in dif_pairs:
-    #
-    #     plot_df = swath_quant.ix[[p1, p2]]
-    #     plot_df['protein'] = plot_df.index
-    #     plot_df = melt(plot_df, id_vars='protein')
-    #     plot_df['time'] = [int(i.split('_')[1][1]) for i in plot_df['variable']]
-    #     plot_df['strain'] = [i.split('_')[0] for i in plot_df['variable']]
-    #     plot_df['condition'] = [i.split('_')[2] for i in plot_df['variable']]
-    #
-    #     p1_color, p2_color = [colors.rgb2hex(c) for c in sns.color_palette('Paired')[:2]]
-    #
-    #     for c_pos, condition in [(0, 'FED'), (1, 'FASTED')]:
-    #         ax = grid[r_pos][c_pos]
-    #         ax.set_xticks(range(3))
-    #
-    #         for protein, protein_colour in [(p1, p1_color), (p2, p2_color)]:
-    #             x, y = plot_df[plot_df.apply(lambda df: df['protein'] == protein and df['strain'] == 'B6' and df['condition'] == condition, axis=1)][['time', 'value']].T.values
-    #             ax.plot(x, y, ls='-', c=protein_colour, label='B6')
-    #             ax.scatter(x, y, s=50, c=protein_colour, edgecolors='none')
-    #
-    #             x, y = plot_df[plot_df.apply(lambda df: df['protein'] == protein and df['strain'] == 'S9' and df['condition'] == condition, axis=1)][['time', 'value']].T.values
-    #             ax.plot(x, y, ls='--', c=protein_colour, label='S9')
-    #             ax.scatter(x, y, s=50, label=protein, c=protein_colour, edgecolors='none')
-    #
-    #             ax.set_title(condition.lower())
-    #
-    #     sns.despine()
-    #     ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    #
-    #     r_pos += 1
-    #
-    # plt.savefig('%s/reports/Figure8_%s_%s_pairs_correlation.pdf' % (wd, hypothesis, fdr_thres), bbox_inches='tight')
-    # plt.close('all')
-    # print '[INFO] Gain/loss of correlation plot generated!'

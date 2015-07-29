@@ -1,12 +1,14 @@
 import re
 import pydot
 import pickle
+import igraph
 import os.path
 import numpy as np
 import seaborn as sns
 import matplotlib.pyplot as plt
 from pylab import rcParams
 from liverx import wd
+from matplotlib.colors import rgb2hex
 from statsmodels.stats.multitest import multipletests
 from scipy.stats.distributions import hypergeom
 from bioservices import KEGG, KEGGParser, QuickGO, UniProt
@@ -66,102 +68,152 @@ go_terms = {go: go_terms[go] for go in go_terms if '<namespace>biological_proces
 print '[INFO] Consider only biological process GO Terms: ', len(go_terms)
 
 # ---- Run Hypergeometric test
-for hypothesis in ['H2', 'H4']:
+for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
 
-    for fdr_thres in ['0.05', '0.01', '0.001', '1e-04']:
+    # ---- Import sub-network
+    subnetwork = read_csv('%s/files/network_enrichment/%s_%s_network.sif' % (wd, hypothesis, fdr_thres), sep='\t', names=['p1', 'i', 'p2'])
 
-        # ---- Import sub-network
-        subnetwork = read_csv('%s/files/network_enrichment/%s_%s_network.sif' % (wd, hypothesis, fdr_thres), header=None, sep='\t')
-        subnetwork_proteins = {i for i in set(subnetwork[0]).union(subnetwork[2])}
+    subnetwork_i = igraph.Graph(directed=False)
+    subnetwork_i.add_vertices(list(set(subnetwork['p1']).union(subnetwork['p2'])))
+    subnetwork_i.add_edges([(p1, p2) for p1, p2 in subnetwork[['p1', 'p2']].values])
+    print '[INFO] String network: ', subnetwork_i.summary()
 
-        # ---- KEGG pathways enrichment analysis
-        # hypergeom.sf(x, M, n, N, loc=0)
-        # M: total number of objects,
-        # n: total number of type I objects
-        # N: total number of type I objects drawn without replacement
-        kegg_pathways_hyper = {p: (hypergeom.sf(
-            len(subnetwork_proteins.intersection(kegg_pathways_proteins[p])),
-            len(network_proteins),
-            len(network_proteins.intersection(kegg_pathways_proteins[p])),
-            len(subnetwork_proteins)
-        ), len(subnetwork_proteins.intersection(kegg_pathways_proteins[p]))) for p in kegg_pathways_proteins if len(subnetwork_proteins.intersection(kegg_pathways_proteins[p])) > 0}
-        print '[INFO] KEGG pathways enrichment done'
+    subnetwork_proteins = set(subnetwork_i.vs['name'])
 
-        kegg_pathways_hyper = DataFrame(kegg_pathways_hyper, index=['pvalue', 'intersection']).T
-        kegg_pathways_hyper['adj.pvalue'] = multipletests(kegg_pathways_hyper['pvalue'], method='fdr_bh')[1]
-        kegg_pathways_hyper = kegg_pathways_hyper.sort('adj.pvalue', ascending=False)
-        kegg_pathways_hyper = kegg_pathways_hyper[kegg_pathways_hyper['adj.pvalue'] < 0.05]
-        kegg_pathways_hyper['name'] = [re.findall('NAME\s*(.*) - Mus musculus\n?', kegg.get(p))[0] for p in kegg_pathways_hyper.index]
-        kegg_pathways_hyper = kegg_pathways_hyper[kegg_pathways_hyper['adj.pvalue'] != 0.0]
+    # ---- KEGG pathways enrichment analysis
+    # hypergeom.sf(x, M, n, N, loc=0)
+    # M: total number of objects,
+    # n: total number of type I objects
+    # N: total number of type I objects drawn without replacement
+    kegg_pathways_hyper = {p: (hypergeom.sf(
+        len(subnetwork_proteins.intersection(kegg_pathways_proteins[p])),
+        len(network_proteins),
+        len(network_proteins.intersection(kegg_pathways_proteins[p])),
+        len(subnetwork_proteins)
+    ), len(subnetwork_proteins.intersection(kegg_pathways_proteins[p]))) for p in kegg_pathways_proteins if len(subnetwork_proteins.intersection(kegg_pathways_proteins[p])) > 0}
+    print '[INFO] KEGG pathways enrichment done'
 
-        rcParams['figure.figsize'] = 5, 0.3 * len(kegg_pathways_hyper)
-        colours, y_pos = sns.color_palette('Paired', 2), [x + 1.5 for x in range(len(kegg_pathways_hyper))]
+    kegg_pathways_hyper = DataFrame(kegg_pathways_hyper, index=['pvalue', 'intersection']).T
+    kegg_pathways_hyper['adj.pvalue'] = multipletests(kegg_pathways_hyper['pvalue'], method='fdr_bh')[1]
+    kegg_pathways_hyper = kegg_pathways_hyper.sort('adj.pvalue', ascending=False)
+    kegg_pathways_hyper = kegg_pathways_hyper[kegg_pathways_hyper['adj.pvalue'] < 0.05]
+    kegg_pathways_hyper['name'] = [re.findall('NAME\s*(.*) - Mus musculus\n?', kegg.get(p))[0] for p in kegg_pathways_hyper.index]
+    kegg_pathways_hyper = kegg_pathways_hyper[kegg_pathways_hyper['adj.pvalue'] != 0.0]
 
-        plt.barh(y_pos, -np.log10(kegg_pathways_hyper['pvalue']), lw=0, align='center', height=.5, color=colours[0], label='p-value')
-        plt.barh(y_pos, -np.log10(kegg_pathways_hyper['adj.pvalue']), lw=0, align='center', height=.5, color=colours[1], label='FDR')
-        plt.yticks(y_pos, kegg_pathways_hyper['name'])
+    # Plot PPI network of the Kegg pathways
+    for set_id, set_name in kegg_pathways_hyper['name'].tail(10).to_dict().items():
+        palette = [rgb2hex((r, g, b)) for r, g, b in sns.color_palette('Paired')[:2]]
 
-        plt.axvline(-np.log10(0.05), ls='--', lw=0.4, c='gray')
-        plt.axvline(-np.log10(0.01), ls='--', lw=0.4, c='gray')
+        set_graph = subnetwork_i.copy()
+        set_graph.vs['label'] = [n.split('_')[0] if n in kegg_pathways_proteins[set_id] else '' for n in set_graph.vs['name']]
+        set_graph.vs['shape'] = ['circle' for n in set_graph.vs['name']]
+        set_graph.vs['color'] = [palette[1] if n in kegg_pathways_proteins[set_id] else palette[0] for n in set_graph.vs['name']]
+        set_graph.vs['size'] = [17 if n in kegg_pathways_proteins[set_id] else 7 for n in set_graph.vs['name']]
 
-        plt.text(-np.log10(0.05) * 1.01, .5, '5%', ha='left', color='gray', fontsize=9)
-        plt.text(-np.log10(0.01) * 1.01, .5, '1%', ha='left', color='gray', fontsize=9)
+        igraph.plot(
+            set_graph,
+            layout=set_graph.layout_fruchterman_reingold(maxiter=2500, area=50 * (len(set_graph.vs) ** 2)),
+            vertex_label_size=5,
+            vertex_label_color='white',
+            bbox=(0, 0, 360, 360),
+            vertex_frame_width=0,
+            edge_width=.5,
+            edge_color='#ECECEC',
+            target='%s/reports/Figure7_%s_%s_kegg_enrichment_network_%s_%s.pdf' % (wd, hypothesis, fdr_thres, set_id, set_name)
+        )
 
-        sns.despine()
-        plt.xlabel('-log10')
-        plt.title('KEGG pathways enrichment')
-        plt.legend(loc=4)
-        plt.savefig('%s/reports/Figure7_%s_%s_kegg_enrichment.pdf' % (wd, hypothesis, fdr_thres), bbox_inches='tight')
-        plt.close('all')
-        print '[INFO] KEGG pathways enrichment plotted'
+    # Plot Kegg pathways enrichment values barplot
+    rcParams['figure.figsize'] = 5, 0.3 * len(kegg_pathways_hyper)
+    colours, y_pos = sns.color_palette('Paired', 2), [x + 1.5 for x in range(len(kegg_pathways_hyper))]
 
-        # ---- GO terms enrichment analysis
-        # hypergeom.sf(x, M, n, N, loc=0)
-        # M: total number of objects,
-        # n: total number of type I objects
-        # N: total number of type I objects drawn without replacement
-        go_terms_hyper = {go: (hypergeom.sf(
-            len(subnetwork_proteins.intersection(go_terms[go])),
-            len(network_proteins),
-            len(network_proteins.intersection(go_terms[go])),
-            len(subnetwork_proteins)
-        ), len(subnetwork_proteins.intersection(go_terms[go]))) for go in go_terms if len(subnetwork_proteins.intersection(go_terms[go])) > 0}
-        print '[INFO] GO terms enrichment done'
+    plt.barh(y_pos, -np.log10(kegg_pathways_hyper['pvalue']), lw=0, align='center', height=.5, color=colours[0], label='p-value')
+    plt.barh(y_pos, -np.log10(kegg_pathways_hyper['adj.pvalue']), lw=0, align='center', height=.5, color=colours[1], label='FDR')
+    plt.yticks(y_pos, kegg_pathways_hyper['name'])
 
-        go_terms_hyper = DataFrame(go_terms_hyper, index=['pvalue', 'intersection']).T.dropna()
-        go_terms_hyper['adj.pvalue'] = multipletests(go_terms_hyper['pvalue'], method='fdr_bh')[1]
-        go_terms_hyper = go_terms_hyper.sort('adj.pvalue', ascending=False)
-        go_terms_hyper = go_terms_hyper[go_terms_hyper['adj.pvalue'] < 0.05]
-        go_terms_hyper['name'] = [re.findall('name: (.*)\n?', quickgo.Term(go, frmt='obo'))[0] for go in go_terms_hyper.index]
-        go_terms_hyper = go_terms_hyper[go_terms_hyper['intersection'] > 2]
-        go_terms_hyper = go_terms_hyper[go_terms_hyper['adj.pvalue'] != 0.0]
+    plt.axvline(-np.log10(0.05), ls='--', lw=0.4, c='gray')
+    plt.axvline(-np.log10(0.01), ls='--', lw=0.4, c='gray')
 
-        rcParams['figure.figsize'] = 5, 0.3 * len(go_terms_hyper)
-        colours, y_pos = sns.color_palette('Paired', 2), [x + 1.5 for x in range(len(go_terms_hyper))]
+    plt.text(-np.log10(0.05) * 1.01, .5, '5%', ha='left', color='gray', fontsize=9)
+    plt.text(-np.log10(0.01) * 1.01, .5, '1%', ha='left', color='gray', fontsize=9)
 
-        plt.barh(y_pos, -np.log10(go_terms_hyper['pvalue']), lw=0, align='center', height=.5, color=colours[0], label='p-value')
-        plt.barh(y_pos, -np.log10(go_terms_hyper['adj.pvalue']), lw=0, align='center', height=.5, color=colours[1], label='FDR')
-        plt.yticks(y_pos, go_terms_hyper['name'])
+    sns.despine()
+    plt.xlabel('-log10')
+    plt.title('KEGG pathways enrichment')
+    plt.legend(loc=4)
+    plt.savefig('%s/reports/Figure7_%s_%s_kegg_enrichment.pdf' % (wd, hypothesis, fdr_thres), bbox_inches='tight')
+    plt.close('all')
+    print '[INFO] KEGG pathways enrichment plotted'
 
-        plt.axvline(-np.log10(0.05), ls='--', lw=0.4, c='gray')
-        plt.axvline(-np.log10(0.01), ls='--', lw=0.4, c='gray')
+    # ---- GO terms enrichment analysis
+    # hypergeom.sf(x, M, n, N, loc=0)
+    # M: total number of objects,
+    # n: total number of type I objects
+    # N: total number of type I objects drawn without replacement
+    go_terms_hyper = {go: (hypergeom.sf(
+        len(subnetwork_proteins.intersection(go_terms[go])),
+        len(network_proteins),
+        len(network_proteins.intersection(go_terms[go])),
+        len(subnetwork_proteins)
+    ), len(subnetwork_proteins.intersection(go_terms[go]))) for go in go_terms if len(subnetwork_proteins.intersection(go_terms[go])) > 0}
+    print '[INFO] GO terms enrichment done'
 
-        plt.text(-np.log10(0.05) * 1.01, .5, '5%', ha='left', color='gray', fontsize=9)
-        plt.text(-np.log10(0.01) * 1.01, .5, '1%', ha='left', color='gray', fontsize=9)
+    go_terms_hyper = DataFrame(go_terms_hyper, index=['pvalue', 'intersection']).T.dropna()
+    go_terms_hyper['adj.pvalue'] = multipletests(go_terms_hyper['pvalue'], method='fdr_bh')[1]
+    go_terms_hyper = go_terms_hyper.sort('adj.pvalue', ascending=False)
+    go_terms_hyper = go_terms_hyper[go_terms_hyper['adj.pvalue'] < 0.05]
+    go_terms_hyper['name'] = [re.findall('name: (.*)\n?', quickgo.Term(go, frmt='obo'))[0] for go in go_terms_hyper.index]
+    go_terms_hyper = go_terms_hyper[go_terms_hyper['intersection'] > 2]
+    go_terms_hyper = go_terms_hyper[go_terms_hyper['adj.pvalue'] != 0.0]
 
-        sns.despine()
-        plt.xlabel('-log10')
-        plt.title('KEGG pathways enrichment')
-        plt.legend(loc=4)
-        plt.savefig('%s/reports/Figure7_%s_%s_goterms_enrichment.pdf' % (wd, hypothesis, fdr_thres), bbox_inches='tight')
-        plt.close('all')
-        print '[INFO] GO terms enrichment plotted'
+    # Plot PPI network of the GO terms
+    for set_id, set_name in kegg_pathways_hyper['name'].tail(10).to_dict().items():
+        palette = [rgb2hex((r, g, b)) for r, g, b in sns.color_palette('Paired')[:2]]
 
-        # ---- Plot sub-network
-        graph = pydot.Dot(graph_type='graph', rankdir='LR')
+        set_graph = subnetwork_i.copy()
+        set_graph.vs['label'] = [n.split('_')[0] if n in kegg_pathways_proteins[set_id] else '' for n in set_graph.vs['name']]
+        set_graph.vs['shape'] = ['circle' for n in set_graph.vs['name']]
+        set_graph.vs['color'] = [palette[1] if n in kegg_pathways_proteins[set_id] else palette[0] for n in set_graph.vs['name']]
+        set_graph.vs['size'] = [17 if n in kegg_pathways_proteins[set_id] else 7 for n in set_graph.vs['name']]
 
-        for s, t in zip(*(subnetwork[0], subnetwork[2])):
-            graph.add_edge(pydot.Edge(s.split('_')[0], t.split('_')[0]))
+        igraph.plot(
+            set_graph,
+            layout=set_graph.layout_fruchterman_reingold(maxiter=2500, area=50 * (len(set_graph.vs) ** 2)),
+            vertex_label_size=5,
+            vertex_label_color='white',
+            bbox=(0, 0, 360, 360),
+            vertex_frame_width=0,
+            edge_width=.5,
+            edge_color='#ECECEC',
+            target='%s/reports/Figure7_%s_%s_goterms_enrichment_network_%s_%s.pdf' % (wd, hypothesis, fdr_thres, set_id, set_name)
+        )
 
-        graph.write_pdf('%s/reports/Figure7_%s_%s_active_subnetwork.pdf' % (wd, hypothesis, fdr_thres))
-        print '[INFO] Network exported: %s, %s' % (hypothesis, fdr_thres)
+    # Plot GO terms enrichment values barplot
+    rcParams['figure.figsize'] = 5, 0.3 * len(go_terms_hyper)
+    colours, y_pos = sns.color_palette('Paired', 2), [x + 1.5 for x in range(len(go_terms_hyper))]
+
+    plt.barh(y_pos, -np.log10(go_terms_hyper['pvalue']), lw=0, align='center', height=.5, color=colours[0], label='p-value')
+    plt.barh(y_pos, -np.log10(go_terms_hyper['adj.pvalue']), lw=0, align='center', height=.5, color=colours[1], label='FDR')
+    plt.yticks(y_pos, go_terms_hyper['name'])
+
+    plt.axvline(-np.log10(0.05), ls='--', lw=0.4, c='gray')
+    plt.axvline(-np.log10(0.01), ls='--', lw=0.4, c='gray')
+
+    plt.text(-np.log10(0.05) * 1.01, .5, '5%', ha='left', color='gray', fontsize=9)
+    plt.text(-np.log10(0.01) * 1.01, .5, '1%', ha='left', color='gray', fontsize=9)
+
+    sns.despine()
+    plt.xlabel('-log10')
+    plt.title('KEGG pathways enrichment')
+    plt.legend(loc=4)
+    plt.savefig('%s/reports/Figure7_%s_%s_goterms_enrichment.pdf' % (wd, hypothesis, fdr_thres), bbox_inches='tight')
+    plt.close('all')
+    print '[INFO] GO terms enrichment plotted'
+
+    # ---- Plot sub-network
+    graph = pydot.Dot(graph_type='graph', rankdir='LR')
+
+    for s, t in zip(*(subnetwork['p1'], subnetwork['p2'])):
+        graph.add_edge(pydot.Edge(s.split('_')[0], t.split('_')[0]))
+
+    graph.write_pdf('%s/reports/Figure7_%s_%s_active_subnetwork.pdf' % (wd, hypothesis, fdr_thres))
+    print '[INFO] Network exported: %s, %s' % (hypothesis, fdr_thres)
