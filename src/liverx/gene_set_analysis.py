@@ -1,5 +1,4 @@
 import re
-import pydot
 import pickle
 import igraph
 import os.path
@@ -12,7 +11,7 @@ from matplotlib.colors import rgb2hex
 from statsmodels.stats.multitest import multipletests
 from scipy.stats.distributions import hypergeom
 from bioservices import KEGG, KEGGParser, QuickGO, UniProt
-from pandas import DataFrame, Series, read_csv
+from pandas import DataFrame, read_csv
 
 sns.set_style('white')
 
@@ -78,6 +77,11 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
     subnetwork_i.add_edges([(p1, p2) for p1, p2 in subnetwork[['p1', 'p2']].values])
     print '[INFO] String network: ', subnetwork_i.summary()
 
+    # Generate network layout positions
+    palette = [rgb2hex((r, g, b)) for r, g, b in sns.color_palette('Paired')[:2]]
+    layout = subnetwork_i.layout_fruchterman_reingold(maxiter=10000, area=50 * (len(subnetwork_i.vs) ** 2))
+    print '[INFO] String network layout created: ', subnetwork_i.summary()
+
     subnetwork_proteins = set(subnetwork_i.vs['name'])
 
     # ---- KEGG pathways enrichment analysis
@@ -102,23 +106,20 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
 
     # Plot PPI network of the Kegg pathways
     for set_id, set_name in kegg_pathways_hyper['name'].tail(10).to_dict().items():
-        palette = [rgb2hex((r, g, b)) for r, g, b in sns.color_palette('Paired')[:2]]
-
-        set_graph = subnetwork_i.copy()
-        set_graph.vs['label'] = [n.split('_')[0] if n in kegg_pathways_proteins[set_id] else '' for n in set_graph.vs['name']]
-        set_graph.vs['shape'] = ['circle' for n in set_graph.vs['name']]
-        set_graph.vs['color'] = [palette[1] if n in kegg_pathways_proteins[set_id] else palette[0] for n in set_graph.vs['name']]
-        set_graph.vs['size'] = [17 if n in kegg_pathways_proteins[set_id] else 7 for n in set_graph.vs['name']]
+        subnetwork_i.vs['label'] = [n.split('_')[0] if n in kegg_pathways_proteins[set_id] else '' for n in subnetwork_i.vs['name']]
+        subnetwork_i.vs['shape'] = ['circle' for n in subnetwork_i.vs['name']]
+        subnetwork_i.vs['color'] = [palette[1] if n in kegg_pathways_proteins[set_id] else palette[0] for n in subnetwork_i.vs['name']]
+        subnetwork_i.vs['size'] = [17 if n in kegg_pathways_proteins[set_id] else 7 for n in subnetwork_i.vs['name']]
 
         igraph.plot(
-            set_graph,
-            layout=set_graph.layout_fruchterman_reingold(maxiter=2500, area=50 * (len(set_graph.vs) ** 2)),
+            subnetwork_i,
+            layout=layout,
             vertex_label_size=5,
             vertex_label_color='white',
             bbox=(0, 0, 360, 360),
             vertex_frame_width=0,
             edge_width=.5,
-            edge_color='#ECECEC',
+            edge_color='#ececec',
             target='%s/reports/Figure7_%s_%s_kegg_enrichment_network_%s_%s.pdf' % (wd, hypothesis, fdr_thres, set_id, set_name)
         )
 
@@ -166,18 +167,15 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
     go_terms_hyper = go_terms_hyper[go_terms_hyper['adj.pvalue'] != 0.0]
 
     # Plot PPI network of the GO terms
-    for set_id, set_name in kegg_pathways_hyper['name'].tail(10).to_dict().items():
-        palette = [rgb2hex((r, g, b)) for r, g, b in sns.color_palette('Paired')[:2]]
-
-        set_graph = subnetwork_i.copy()
-        set_graph.vs['label'] = [n.split('_')[0] if n in kegg_pathways_proteins[set_id] else '' for n in set_graph.vs['name']]
-        set_graph.vs['shape'] = ['circle' for n in set_graph.vs['name']]
-        set_graph.vs['color'] = [palette[1] if n in kegg_pathways_proteins[set_id] else palette[0] for n in set_graph.vs['name']]
-        set_graph.vs['size'] = [17 if n in kegg_pathways_proteins[set_id] else 7 for n in set_graph.vs['name']]
+    for set_id, set_name in go_terms_hyper['name'].tail(10).to_dict().items():
+        subnetwork_i.vs['label'] = [n.split('_')[0] if n in go_terms[set_id] else '' for n in subnetwork_i.vs['name']]
+        subnetwork_i.vs['shape'] = ['circle' for n in subnetwork_i.vs['name']]
+        subnetwork_i.vs['color'] = [palette[1] if n in go_terms[set_id] else palette[0] for n in subnetwork_i.vs['name']]
+        subnetwork_i.vs['size'] = [17 if n in go_terms[set_id] else 7 for n in subnetwork_i.vs['name']]
 
         igraph.plot(
-            set_graph,
-            layout=set_graph.layout_fruchterman_reingold(maxiter=2500, area=50 * (len(set_graph.vs) ** 2)),
+            subnetwork_i,
+            layout=layout,
             vertex_label_size=5,
             vertex_label_color='white',
             bbox=(0, 0, 360, 360),
@@ -208,12 +206,3 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
     plt.savefig('%s/reports/Figure7_%s_%s_goterms_enrichment.pdf' % (wd, hypothesis, fdr_thres), bbox_inches='tight')
     plt.close('all')
     print '[INFO] GO terms enrichment plotted'
-
-    # ---- Plot sub-network
-    graph = pydot.Dot(graph_type='graph', rankdir='LR')
-
-    for s, t in zip(*(subnetwork['p1'], subnetwork['p2'])):
-        graph.add_edge(pydot.Edge(s.split('_')[0], t.split('_')[0]))
-
-    graph.write_pdf('%s/reports/Figure7_%s_%s_active_subnetwork.pdf' % (wd, hypothesis, fdr_thres))
-    print '[INFO] Network exported: %s, %s' % (hypothesis, fdr_thres)
