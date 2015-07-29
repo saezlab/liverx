@@ -35,9 +35,9 @@ kegg_pathways = {p: kegg.parse_kgml_pathway(p) for p in kegg.pathwayIds}
 print '[INFO] KEGG pathways extracted: ', len(kegg_pathways)
 
 # Convert KEGG pathways Gene Name to UniProt
-kegg_to_uniprot = kegg.conv('uniprot', 'mmu')
+k2u = kegg.conv('uniprot', 'mmu')
 
-kegg_pathways_proteins = {p: {kegg_to_uniprot[x].split(':')[1] for i in kegg_pathways[p]['entries'] if i['type'] == 'gene' for x in i['name'].split(' ') if x in kegg_to_uniprot} for p in kegg_pathways}
+kegg_pathways_proteins = {p: {k2u[x].split(':')[1] for i in kegg_pathways[p]['entries'] if i['type'] == 'gene' for x in i['name'].split(' ') if x in k2u} for p in kegg_pathways}
 
 kegg_uniprot_acc_map = {x for p in kegg_pathways_proteins for x in kegg_pathways_proteins[p]}
 kegg_uniprot_acc_map = {p: uniprot.get_fasta(str(p)).split(' ')[0].split('|')[2] for p in kegg_uniprot_acc_map}
@@ -103,14 +103,6 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
     kegg_pathways_hyper = kegg_pathways_hyper[kegg_pathways_hyper['adj.pvalue'] < 0.05]
     kegg_pathways_hyper['name'] = [re.findall('NAME\s*(.*) - Mus musculus\n?', kegg.get(p))[0] for p in kegg_pathways_hyper.index]
     kegg_pathways_hyper = kegg_pathways_hyper[kegg_pathways_hyper['adj.pvalue'] != 0.0]
-
-    node_color_dict = dict(zip(*(kegg_pathways_hyper.tail(7).index, sns.color_palette('Set1', 7))))
-    [p for k in node_color_dict for p in kegg_pathways_proteins[k] if p in subnetwork_proteins]
-
-    subnetwork_i.vs['label'] = ['' in subnetwork_i.vs['name']]
-    subnetwork_i.vs['shape'] = ['circle' for n in subnetwork_i.vs['name']]
-    subnetwork_i.vs['color'] = [palette[1] if n in kegg_pathways_proteins[set_id] else palette[0] for n in subnetwork_i.vs['name']]
-    subnetwork_i.vs['size'] = [17 if n in kegg_pathways_proteins[set_id] else 7 for n in subnetwork_i.vs['name']]
 
     # Plot PPI network of the Kegg pathways
     for set_id, set_name in kegg_pathways_hyper['name'].tail(10).to_dict().items():
