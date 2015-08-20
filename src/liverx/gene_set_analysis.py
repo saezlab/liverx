@@ -66,6 +66,12 @@ print '[INFO] GO Terms UniProt list dictionary built: ', len(go_terms)
 go_terms = {go: go_terms[go] for go in go_terms if '<namespace>biological_process</namespace>' in quickgo.Term(go)}
 print '[INFO] Consider only biological process GO Terms: ', len(go_terms)
 
+palette = {
+    'H2': [rgb2hex((r, g, b)) for r, g, b in sns.color_palette('Paired')[:2]],
+    'H4': [rgb2hex((r, g, b)) for r, g, b in sns.color_palette('Paired')[4:6]]
+}
+print '[INFO] Palettes created'
+
 # ---- Run Hypergeometric test
 for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
 
@@ -78,7 +84,6 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
     print '[INFO] String network: ', subnetwork_i.summary()
 
     # Generate network layout positions
-    palette = [rgb2hex((r, g, b)) for r, g, b in sns.color_palette('Paired')[:2]]
     layout = subnetwork_i.layout_fruchterman_reingold(maxiter=10000, area=50 * (len(subnetwork_i.vs) ** 2))
     print '[INFO] String network layout created: ', subnetwork_i.summary()
 
@@ -108,7 +113,7 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
     for set_id, set_name in kegg_pathways_hyper['name'].tail(10).to_dict().items():
         subnetwork_i.vs['label'] = [n.split('_')[0] if n in kegg_pathways_proteins[set_id] else '' for n in subnetwork_i.vs['name']]
         subnetwork_i.vs['shape'] = ['circle' for n in subnetwork_i.vs['name']]
-        subnetwork_i.vs['color'] = [palette[1] if n in kegg_pathways_proteins[set_id] else palette[0] for n in subnetwork_i.vs['name']]
+        subnetwork_i.vs['color'] = [palette[hypothesis][1] if n in kegg_pathways_proteins[set_id] else palette[hypothesis][0] for n in subnetwork_i.vs['name']]
         subnetwork_i.vs['size'] = [17 if n in kegg_pathways_proteins[set_id] else 7 for n in subnetwork_i.vs['name']]
 
         igraph.plot(
@@ -125,7 +130,7 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
 
     # Plot Kegg pathways enrichment values barplot
     rcParams['figure.figsize'] = 5, 0.3 * len(kegg_pathways_hyper)
-    colours, y_pos = sns.color_palette('Paired', 2), [x + 1.5 for x in range(len(kegg_pathways_hyper))]
+    colours, y_pos = palette[hypothesis], [x + 1.5 for x in range(len(kegg_pathways_hyper))]
 
     plt.barh(y_pos, -np.log10(kegg_pathways_hyper['pvalue']), lw=0, align='center', height=.5, color=colours[0], label='p-value')
     plt.barh(y_pos, -np.log10(kegg_pathways_hyper['adj.pvalue']), lw=0, align='center', height=.5, color=colours[1], label='FDR')
@@ -170,7 +175,7 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
     for set_id, set_name in go_terms_hyper['name'].tail(10).to_dict().items():
         subnetwork_i.vs['label'] = [n.split('_')[0] if n in go_terms[set_id] else '' for n in subnetwork_i.vs['name']]
         subnetwork_i.vs['shape'] = ['circle' for n in subnetwork_i.vs['name']]
-        subnetwork_i.vs['color'] = [palette[1] if n in go_terms[set_id] else palette[0] for n in subnetwork_i.vs['name']]
+        subnetwork_i.vs['color'] = [palette[hypothesis][1] if n in go_terms[set_id] else palette[hypothesis][0] for n in subnetwork_i.vs['name']]
         subnetwork_i.vs['size'] = [17 if n in go_terms[set_id] else 7 for n in subnetwork_i.vs['name']]
 
         igraph.plot(
@@ -187,7 +192,7 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
 
     # Plot GO terms enrichment values barplot
     rcParams['figure.figsize'] = 5, 0.3 * len(go_terms_hyper)
-    colours, y_pos = sns.color_palette('Paired', 2), [x + 1.5 for x in range(len(go_terms_hyper))]
+    colours, y_pos = palette[hypothesis], [x + 1.5 for x in range(len(go_terms_hyper))]
 
     plt.barh(y_pos, -np.log10(go_terms_hyper['pvalue']), lw=0, align='center', height=.5, color=colours[0], label='p-value')
     plt.barh(y_pos, -np.log10(go_terms_hyper['adj.pvalue']), lw=0, align='center', height=.5, color=colours[1], label='FDR')
