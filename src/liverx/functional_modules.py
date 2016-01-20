@@ -39,7 +39,7 @@ print '[INFO] String network: ', network_i.summary()
 network_i = network_i.subgraph(set(network_i.vs['name']).intersection(swath_quant.index))
 print '[INFO] Swath measured simplified string network: ', network_i.summary()
 
-hypothesis, fdr_thres = 'H2', '0.05'
+hypothesis, fdr_thres = 'H4', '0.05'
 
 # ---- Import subnetwork
 subnetwork = read_csv('%s/files/network_enrichment/%s_%s_network.sif' % (wd, hypothesis, fdr_thres), header=None, sep='\t', names=['p1', 'i', 'p2'])
