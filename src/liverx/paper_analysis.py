@@ -186,9 +186,9 @@ comp_corr_df = melt(comp_corr_df, id_vars='index')
 
 g = sns.FacetGrid(comp_corr_df, col='variable')
 g.map(plt.axvline, x=0, ls=':', c='.5', color='#95a5a6')
-g.map(sns.pointplot, 'value', 'index', marker='o', ms=4, color='#95a5a6')
+g.map(sns.pointplot, 'value', 'index', marker='o', ms=4, color='#95a5a6', linestyles='')
 g.set_axis_labels('Correlation coefficient', '')
-plt.savefig('%s/reports/Figure4_correlations_%s.pdf' % (wd, name), bbox_inches='tight')
+plt.savefig('%s/reports/Figure4_correlations_%s.pdf' % (wd, 'SRM'), bbox_inches='tight')
 plt.close('all')
 
 
