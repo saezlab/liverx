@@ -16,10 +16,11 @@ def rmse(x, y):
 
 sns.set(style='ticks', palette='pastel', color_codes=True)
 
+swath_fc = read_csv('%s/data/result_swath_v2.3.7_fRfS.csv' % wd)
 swath = read_csv('%s/data/result_swath_v2.3.7_protein_quant.tab' % wd, sep='\t').replace(0.0, np.NaN)
 
 
-# ---- Defined conditions
+# -- Defined conditions
 b6 = [c for c in swath.columns if c.startswith('B6')]
 s9 = [c for c in swath.columns if c.startswith('S9')]
 
@@ -27,7 +28,7 @@ b6_fed, b6_fasted = [c for c in b6 if c.endswith('FED')], [c for c in b6 if c.en
 s9_fed, s9_fasted = [c for c in s9 if c.endswith('FED')], [c for c in s9 if c.endswith('FASTED')]
 
 
-# ---- Plotting H2
+# -- Plotting H2
 hypothesis, fdr_thres = ('H2', '0.05')
 corr = read_csv('%s/files/protein_pairs_%s_%s.txt' % (wd, hypothesis, fdr_thres), sep='\t')
 
