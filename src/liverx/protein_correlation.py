@@ -16,11 +16,11 @@ sns.set_style('ticks')
 
 swath_quant = read_csv('%s/data/result_swath_v2.3.7_protein_quant.tab' % wd, sep='\t').replace(0.0, np.NaN)
 
-# ---- Defined conditions
+# -- Defined conditions
 b6 = [c for c in swath_quant.columns if c.startswith('B6')]
 s9 = [c for c in swath_quant.columns if c.startswith('S9')]
 
-# ---- Import String network
+# -- Import String network
 network = read_csv('%s/files/string_mouse_network_filtered_800.txt' % wd, sep='\t', names=['p1', 'p2'], skiprows=1)
 
 network_i = igraph.Graph(directed=False)
@@ -32,7 +32,7 @@ network_i = network_i.subgraph(set(network_i.vs['name']).intersection(swath_quan
 print '[INFO] Swath measured simplified string network: ', network_i.summary()
 
 
-# ---- Randomly suffle kinase matrix while keeping NaNs position
+# -- Randomly suffle kinase matrix while keeping NaNs position
 def randomise_matrix(matrix):
     random_df = matrix.copy()
     movers = ~np.isnan(random_df.values)
@@ -47,7 +47,7 @@ print '[INFO] SWATH data-set randomisation done: ', len(swath_rand_s9)
 for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
     print '[INFO] Hypothesis, FDR: ', hypothesis, fdr_thres
 
-    # ---- Import subnetwork
+    # -- Import subnetwork
     subnetwork = read_csv('%s/files/network_enrichment/%s_%s_network.sif' % (wd, hypothesis, fdr_thres), header=None, sep='\t', names=['p1', 'i', 'p2'])
     subnetwork_i = network_i.subgraph(set(it.chain(*network_i.neighborhood(set(subnetwork['p1']).union(subnetwork['p2']), order=0)))).simplify()
     print '[INFO] Swath measured simplified string subnetwork: ', subnetwork_i.summary()
@@ -81,7 +81,7 @@ for hypothesis, fdr_thres in [('H2', '0.05'), ('H4', '0.05')]:
             print '\t', p1, p2, 'NaN', 'NaN', n_meas
             return p1, p2, np.NaN, np.NaN, n_meas
 
-    # ---- Compute correlations differences
+    # -- Compute correlations differences
     correlation_df = [correlation(p1, p2) for p1, p2 in subnetwork]
     correlation_df = DataFrame(correlation_df, columns=['p1', 'p2', 'diff', 'e_pvalue', 'meas']).dropna()
     correlation_df['adj_e_pvalue'] = multipletests(correlation_df['e_pvalue'], method='fdr_bh')[1]
