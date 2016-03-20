@@ -39,7 +39,7 @@ def randomise_matrix(matrix):
     random_df.values[movers] = np.random.permutation(random_df.values[movers])
     return random_df
 
-n_permutations = 1000
+n_permutations = 10000
 swath_rand_b6 = [randomise_matrix(swath_quant[b6]) for i in xrange(n_permutations)]
 swath_rand_s9 = [randomise_matrix(swath_quant[s9]) for i in xrange(n_permutations)]
 print '[INFO] SWATH data-set randomisation done: ', len(swath_rand_s9)
