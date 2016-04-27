@@ -16,29 +16,20 @@ def rmse(x, y):
 
 sns.set(style='ticks', palette='pastel', color_codes=True)
 
-swath_fc = read_csv('%s/data/result_swath_v2.3.7_fRfS.csv' % wd)
-swath = read_csv('%s/data/result_swath_v2.3.7_protein_quant.tab' % wd, sep='\t').replace(0.0, np.NaN)
+swath = read_csv('%s/data/subset-data-for-figure8.csv' % wd).append(read_csv('%s/data/result_swath_fasted_v2.3.7_fRfS_20160420.csv' % wd, index_col=0)).dropna()
 
 
 # -- Defined conditions
-b6 = [c for c in swath.columns if c.startswith('B6')]
-s9 = [c for c in swath.columns if c.startswith('S9')]
-
-b6_fed, b6_fasted = [c for c in b6 if c.endswith('FED')], [c for c in b6 if c.endswith('FASTED')]
-s9_fed, s9_fasted = [c for c in s9 if c.endswith('FED')], [c for c in s9 if c.endswith('FASTED')]
+b6_fed = ['B6_T1_fed-B6_T0_fed', 'B6_T2_fed-B6_T0_fed']
+s9_fed = ['S9_T1_fed-S9_T0_fed', 'S9_T2_fed-S9_T0_fed']
 
 
 # -- Plotting H2
-hypothesis, fdr_thres = ('H2', '0.05')
-corr = read_csv('%s/files/protein_pairs_%s_%s.txt' % (wd, hypothesis, fdr_thres), sep='\t')
+p_pairs = [('ITB1_MOUSE', 'ICAM1_MOUSE'), ('AKC1H_MOUSE', '3BHS5_MOUSE'), ('CP4AA_MOUSE', 'UD11_MOUSE'), ('AOFB_MOUSE', 'ADH1_MOUSE')]
 
-corr = corr[corr['e_pvalue'] < 0.05]
-corr['fed_rmse'] = [rmse(swath.ix[p1, b6_fed], swath.ix[p1, s9_fed]) + rmse(swath.ix[p2, b6_fed], swath.ix[p2, s9_fed]) for p1, p2 in corr[['p1', 'p2']].values]
-corr = corr.sort('fed_rmse', ascending=False)
-
-(f, grid), r_pos = plt.subplots(len(corr), 2, figsize=(5, 3 * len(corr)), sharey='row', sharex='col'), 0
-for p1, p2 in corr[['p1', 'p2']].values:
-    plot_df = swath.ix[[p1, p2]]
+(f, grid), r_pos = plt.subplots(len(p_pairs), 2, figsize=(5, 3 * len(p_pairs)), sharey='row', sharex='col'), 0
+for p1, p2 in p_pairs:
+    plot_df = swath[[i in (p1, p2) for i in swath['Protein']]]
 
     plot_df[b6_fed] = plot_df[b6_fed].subtract(plot_df[b6_fed[0]], axis=0)
     plot_df[s9_fed] = plot_df[s9_fed].subtract(plot_df[s9_fed[0]], axis=0)
@@ -76,7 +67,7 @@ for p1, p2 in corr[['p1', 'p2']].values:
 
     r_pos += 1
 
-plt.savefig('%s/reports/Figure8_%s_%s_pairs_correlation.pdf' % (wd, hypothesis, fdr_thres), bbox_inches='tight')
+plt.savefig('%s/reports/%s_%s_pairs_correlation.pdf' % (wd, hypothesis, fdr_thres), bbox_inches='tight')
 plt.close('all')
 print '[INFO] Gain/loss of correlation plot generated!'
 

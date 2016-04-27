@@ -99,6 +99,7 @@ plt.close('all')
 plot_df = [(f, -np.log10(p), l, t) for name in x_order for prot, f, p, l, t in datasets_fc[name][['Protein', 'log2FC', 'adj.pvalue', 'Label', 'type']].values if l in cond_h1 and prot in ov_set]
 plot_df = DataFrame(plot_df, columns=['fc', 'pvalue', 'condition', 'type'])
 g = sns.lmplot(x='fc', y='pvalue', data=plot_df, col='type', hue='type', col_order=x_order, palette=datasets_colour, sharex=False, sharey=False, scatter_kws={'alpha': .4})
+g.set(xlim=(-6, 6))
 g.set_axis_labels('Fold-change (log2)', 'p-value (-log10 FDR)')
 sns.despine(trim=True)
 plt.savefig(wd + '/reports/Supp_material_overlap_volcanos.pdf', bbox_inches='tight')
