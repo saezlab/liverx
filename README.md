@@ -1,8 +1,7 @@
 # LiverX mouse proteomics
 These scripts correspond to the analysis of the paper:
 
-Terfve et al. System-wide quantitative proteomics of the metabolic syndrome in mice: genotypic and dietary effects. 
-http://biorxiv.org/content/early/2016/05/12/051508
+[Terfve, C., Sabidó, E., Wu, Y., Gonçalves, E., Choi, M., Vaga, S., Vitek, O., Saez-Rodriguez, J., Aebersold, R., 2017. System-Wide Quantitative Proteomics of the Metabolic Syndrome in Mice: Genotypic and Dietary Effects. J. Proteome Res. 16, 831–841.](http://dx.doi.org/10.1021/acs.jproteome.6b00815)
 
 ### Folders description
 + data: Mass-spectometry data-sets processed my MSstats
